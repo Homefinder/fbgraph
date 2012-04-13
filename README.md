@@ -15,6 +15,63 @@ Thanks goes out to Cristiano for putting a lot of the leg work in this.  If you
 have any questions in the meantime before things are more fleshed out, let me
 know.
 
+## Quickstart
+
+```javascript
+// add to your package.json dependencies
+
+"fbgraph": "https://github.com/malkomalko/fbgraph/tarball/master"
+
+// setup express app middleware, make sure it comes after session middleware
+
+var graph = require('fbgraph');
+
+app.configure(function() {
+  ...
+  app.use(express.session(..));
+  app.use(graph.middleware({
+    appId: 'your_app_id',
+    appSecret: 'your_app_secret',
+    scope: 'list, of, permissions',
+    redirectUri: 'http://your/redirect/url'
+  }));
+  ...
+});
+
+/**
+ * with that setup, you now have access to req.facebook with most of the same options as fbgraph
+ * - ex: req.facebook.get, req.facebook.authorize... etc
+ */
+
+// setup your redirect url for login/registration
+
+app.get('/redirect/url', function(req, res) {
+  if (req.facebook.accessToken) {
+    req.flash('info', 'You are already authenticated.');
+    return res.redirect('/already/logged_in/url');
+  }
+
+  if (!req.query.code) {
+    return res.redirect(req.facebook.getOauthUrl());
+  }
+
+  if (!req.query.error) {
+    req.facebook.authorize(req.query.code, function(err, result) {
+      if (err) {
+        req.flash('error', 'There was an error logging in.');
+        return res.redirect('/some/error/url');
+      }   
+
+      req.flash('success', 'We are a go....');
+      res.redirect('/some/logged_in/url');
+    }); 
+  } else {
+    req.flash('error', 'There was an error logging in.');
+    res.redirect('/some/error/url');
+  }
+});
+```
+
 ## License
 
 (The MIT License)
