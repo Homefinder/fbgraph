@@ -33,7 +33,7 @@ app.configure(function() {
     appId: 'your_app_id',
     appSecret: 'your_app_secret',
     scope: 'list, of, permissions',
-    redirectUri: 'http://your/redirect/url'
+    redirectBase: 'http://localhost'
   }));
   ...
 });
